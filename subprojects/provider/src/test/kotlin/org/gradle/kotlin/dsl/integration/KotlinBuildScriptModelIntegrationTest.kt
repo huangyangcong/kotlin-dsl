@@ -2,6 +2,7 @@ package org.gradle.kotlin.dsl.integration
 
 import org.gradle.kotlin.dsl.embeddedKotlinVersion
 import org.gradle.kotlin.dsl.fixtures.DeepThought
+import org.gradle.kotlin.dsl.fixtures.matching
 
 import org.gradle.util.TextUtil.normaliseFileSeparators
 
@@ -10,6 +11,7 @@ import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.hasItem
 import org.hamcrest.CoreMatchers.hasItems
 import org.hamcrest.CoreMatchers.not
+import org.hamcrest.Matcher
 
 import org.hamcrest.MatcherAssert.assertThat
 
@@ -202,14 +204,14 @@ class KotlinBuildScriptModelIntegrationTest : ScriptModelIntegrationTest() {
 
         assertSourcePathIncludesKotlinStdlibSourcesGiven(
             rootProjectScript = "",
-            subProjectScript = "buildscript { repositories { jcenter() } }")
+            subProjectScript = "buildscript { $repositories }")
     }
 
     @Test
     fun `sourcePath includes kotlin-stdlib sources resolved against project hierarchy`() {
 
         assertSourcePathIncludesKotlinStdlibSourcesGiven(
-            rootProjectScript = "buildscript { repositories { jcenter() } }",
+            rootProjectScript = "buildscript { $repositories }",
             subProjectScript = "")
     }
 
@@ -221,7 +223,7 @@ class KotlinBuildScriptModelIntegrationTest : ScriptModelIntegrationTest() {
             subProjectScript = """
                 buildscript {
                     dependencies { classpath(embeddedKotlin("gradle-plugin")) }
-                    repositories { jcenter() }
+                    $repositories
                 }
             """)
     }
@@ -233,11 +235,19 @@ class KotlinBuildScriptModelIntegrationTest : ScriptModelIntegrationTest() {
             rootProjectScript = """
                 buildscript {
                     dependencies { classpath(embeddedKotlin("gradle-plugin")) }
-                    repositories { jcenter() }
+                    $repositories
                 }
             """,
             subProjectScript = "")
     }
+
+    private
+    val repositories = """
+        repositories {
+            maven(url = "https://dl.bintray.com/kotlin/kotlin-dev/")
+            jcenter()
+        }
+    """
 
     @Test
     fun `sourcePath includes plugins classpath sources resolved against project`() {
@@ -268,4 +278,55 @@ class KotlinBuildScriptModelIntegrationTest : ScriptModelIntegrationTest() {
             sourcePathFor(withFile("sub/build.gradle.kts")),
             matchesProjectsSourceRoots(*sourceRoots))
     }
+
+    private
+    fun assertSourcePathIncludesGradleSourcesGiven(rootProjectScript: String, subProjectScript: String) {
+
+        assertSourcePathGiven(
+            rootProjectScript,
+            subProjectScript,
+            hasItems("core-api"))
+    }
+
+    private
+    fun assertSourcePathIncludesKotlinStdlibSourcesGiven(rootProjectScript: String, subProjectScript: String) {
+
+        assertSourcePathGiven(
+            rootProjectScript,
+            subProjectScript,
+            hasItems("kotlin-stdlib-jdk8-$embeddedKotlinVersion-sources.jar"))
+    }
+
+    private
+    fun assertSourcePathIncludesKotlinPluginSourcesGiven(rootProjectScript: String, subProjectScript: String) {
+
+        assertSourcePathGiven(
+            rootProjectScript,
+            subProjectScript,
+            hasItems(
+                equalTo("kotlin-gradle-plugin-$embeddedKotlinVersion-sources.jar"),
+                matching("annotations-[0-9.]+-sources\\.jar")))
+    }
+
+    private
+    fun assertSourcePathGiven(
+        rootProjectScript: String,
+        subProjectScript: String,
+        matches: Matcher<Iterable<String>>
+    ) {
+
+        val subProjectName = "sub"
+        withSettings("""
+            pluginManagement {
+                $repositories
+            }
+            include("$subProjectName")
+        """)
+
+        withBuildScript(rootProjectScript)
+        val subProjectScriptFile = withBuildScriptIn(subProjectName, subProjectScript)
+
+        assertThat(sourcePathFor(subProjectScriptFile).map { it.name }, matches)
+    }
+
 }

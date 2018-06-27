@@ -26,11 +26,25 @@ class TestKitIntegrationTest : AbstractIntegrationTest() {
     @Test
     fun `withPluginClasspath works`() {
 
+        withSettings(
+            pluginManagementBlockWithKotlinDevRepository
+        )
+
         withBuildScript("""
 
             plugins {
                 `java-gradle-plugin`
                 `kotlin-dsl`
+            }
+
+            repositories {
+                kotlinDev()
+            }
+
+            tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+                kotlinOptions {
+                    freeCompilerArgs += "-Xdisable-default-scripting-plugin"
+                }
             }
 
             gradlePlugin {

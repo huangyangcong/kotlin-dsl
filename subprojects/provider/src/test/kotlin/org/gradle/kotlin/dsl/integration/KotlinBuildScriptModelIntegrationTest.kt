@@ -244,7 +244,7 @@ class KotlinBuildScriptModelIntegrationTest : ScriptModelIntegrationTest() {
     private
     val repositories = """
         repositories {
-            maven(url = "https://dl.bintray.com/kotlin/kotlin-dev/")
+            kotlinDev()
             jcenter()
         }
     """

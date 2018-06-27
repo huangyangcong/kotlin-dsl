@@ -20,10 +20,16 @@ class KotlinDslPluginTest : AbstractPluginTest() {
     @Test
     fun `gradle kotlin dsl api dependency is added`() {
 
+        withKotlinDevPluginRepository()
+
         withBuildScript("""
 
             plugins {
                 `kotlin-dsl`
+            }
+
+            repositories {
+                kotlinDev()
             }
 
         """)
@@ -43,8 +49,16 @@ class KotlinDslPluginTest : AbstractPluginTest() {
         assertThat(result.outcomeOf(":compileKotlin"), equalTo(TaskOutcome.SUCCESS))
     }
 
+    private
+    fun withKotlinDevPluginRepository() {
+        withSettings(pluginManagementBlockWithKotlinDevRepository)
+    }
+
     @Test
     fun `gradle kotlin dsl api is available for test implementation`() {
+
+        withKotlinDevPluginRepository()
+
         withBuildScript("""
 
             plugins {
@@ -53,6 +67,7 @@ class KotlinDslPluginTest : AbstractPluginTest() {
             }
 
             repositories {
+                kotlinDev()
                 jcenter()
             }
 
@@ -102,6 +117,8 @@ class KotlinDslPluginTest : AbstractPluginTest() {
     @Test
     fun `gradle kotlin dsl api is available in test-kit injected plugin classpath`() {
 
+        withKotlinDevPluginRepository()
+
         withBuildScript("""
 
             plugins {
@@ -110,6 +127,7 @@ class KotlinDslPluginTest : AbstractPluginTest() {
             }
 
             repositories {
+                kotlinDev()
                 jcenter()
             }
 
@@ -199,12 +217,17 @@ class KotlinDslPluginTest : AbstractPluginTest() {
     @Test
     fun `sam-with-receiver kotlin compiler plugin is applied to production code`() {
 
+        withKotlinDevPluginRepository()
+
         withBuildScript("""
 
             plugins {
                 `kotlin-dsl`
             }
 
+            repositories {
+                kotlinDev()
+            }
         """)
 
         withFile("src/main/kotlin/code.kt", """

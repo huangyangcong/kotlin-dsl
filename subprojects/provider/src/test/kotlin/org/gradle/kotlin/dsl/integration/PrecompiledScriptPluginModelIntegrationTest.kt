@@ -19,9 +19,17 @@ class PrecompiledScriptPluginModelIntegrationTest : ScriptModelIntegrationTest()
         val classpathDependency =
             withFile("classpath.jar")
 
+        withSettings(
+            pluginManagementBlockWithKotlinDevRepository
+        )
+
         withBuildScript("""
             plugins {
                 `kotlin-dsl`
+            }
+
+            repositories {
+                kotlinDev()
             }
 
             buildscript {
@@ -56,6 +64,9 @@ class PrecompiledScriptPluginModelIntegrationTest : ScriptModelIntegrationTest()
         projectRoot.withFolders {
 
             withFile("settings.gradle.kts", """
+
+                $pluginManagementBlockWithKotlinDevRepository
+
                 include("project-a")
                 include("project-b")
             """)
@@ -91,6 +102,10 @@ class PrecompiledScriptPluginModelIntegrationTest : ScriptModelIntegrationTest()
         withFile("build.gradle.kts", """
             plugins {
                 `kotlin-dsl`
+            }
+
+            repositories {
+                kotlinDev()
             }
 
             dependencies {

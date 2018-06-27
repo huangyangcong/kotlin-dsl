@@ -804,10 +804,22 @@ class GradleKotlinDslIntegrationTest : AbstractIntegrationTest() {
     @Test
     fun `given generic extension types they can be accessed and configured`() {
 
+        withSettingsIn("buildSrc", pluginManagementBlockWithKotlinDevRepository)
+
         withFile("buildSrc/build.gradle.kts", """
             plugins {
-                `kotlin-dsl`
                 `java-gradle-plugin`
+                `kotlin-dsl`
+            }
+
+            repositories {
+                kotlinDev()
+            }
+
+            tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+                kotlinOptions {
+                    freeCompilerArgs += "-Xdisable-default-scripting-plugin"
+                }
             }
 
             gradlePlugin {

@@ -120,6 +120,7 @@ class ProjectSchemaAccessorsIntegrationTest : AbstractIntegrationTest() {
             }
 
             withFile("settings.gradle.kts", """
+                $pluginManagementBlockWithKotlinDevRepository
                 include("app", "lib")
             """)
         }
@@ -128,14 +129,22 @@ class ProjectSchemaAccessorsIntegrationTest : AbstractIntegrationTest() {
     }
 
     private
-    fun FoldersDsl.withPrecompiledPlugins() =
+    fun FoldersDsl.withPrecompiledPlugins() {
+        withFile("settings.gradle.kts", pluginManagementBlockWithKotlinDevRepository)
         withFile("build.gradle.kts", """
             plugins {
                 `kotlin-dsl`
                 `java-gradle-plugin`
             }
+
+            repositories {
+                kotlinDev()
+            }
+
             apply<org.gradle.kotlin.dsl.plugins.precompiled.PrecompiledScriptPlugins>()
+
         """)
+    }
 
     @Test
     fun `conflicting extensions across build runs`() {
@@ -144,11 +153,13 @@ class ProjectSchemaAccessorsIntegrationTest : AbstractIntegrationTest() {
 
             "buildSrc" {
 
+                withFile("settings.gradle.kts", pluginManagementBlockWithKotlinDevRepository)
                 withFile("build.gradle.kts", """
                     plugins {
                         `kotlin-dsl`
                         `java-gradle-plugin`
                     }
+                    repositories { kotlinDev() }
                     apply<org.gradle.kotlin.dsl.plugins.precompiled.PrecompiledScriptPlugins>()
                 """)
 
@@ -171,7 +182,7 @@ class ProjectSchemaAccessorsIntegrationTest : AbstractIntegrationTest() {
                 my { name = "kotlin-dsl" }
             """)
 
-            withFile("settings.gradle.kts")
+            withFile("settings.gradle.kts", pluginManagementBlockWithKotlinDevRepository)
         }
 
         build("tasks", "-Pmy=lib")
@@ -445,10 +456,22 @@ class ProjectSchemaAccessorsIntegrationTest : AbstractIntegrationTest() {
     @Test
     fun `given extension with erased generic type parameters, its accessor is typed Any`() {
 
+        withSettingsIn("buildSrc", pluginManagementBlockWithKotlinDevRepository)
+
         withFile("buildSrc/build.gradle.kts", """
             plugins {
-                `kotlin-dsl`
                 `java-gradle-plugin`
+                `kotlin-dsl`
+            }
+
+            repositories {
+                kotlinDev()
+            }
+
+            tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+                kotlinOptions {
+                    freeCompilerArgs += "-Xdisable-default-scripting-plugin"
+                }
             }
 
             gradlePlugin {
@@ -494,11 +517,23 @@ class ProjectSchemaAccessorsIntegrationTest : AbstractIntegrationTest() {
 
     @Test
     fun `can access nested extensions and conventions registered by declared plugins via jit accessors`() {
+        withSettingsIn("buildSrc", pluginManagementBlockWithKotlinDevRepository)
         withBuildScriptIn("buildSrc", """
             plugins {
                 `java-gradle-plugin`
                 `kotlin-dsl`
             }
+
+            repositories {
+                kotlinDev()
+            }
+
+            tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+                kotlinOptions {
+                    freeCompilerArgs += "-Xdisable-default-scripting-plugin"
+                }
+            }
+
             gradlePlugin {
                 (plugins) {
                     "my-plugin" {
@@ -582,11 +617,23 @@ class ProjectSchemaAccessorsIntegrationTest : AbstractIntegrationTest() {
 
     @Test
     fun `convention accessors honor HasPublicType`() {
+        withSettingsIn("buildSrc", pluginManagementBlockWithKotlinDevRepository)
         withBuildScriptIn("buildSrc", """
             plugins {
                 `java-gradle-plugin`
                 `kotlin-dsl`
             }
+
+            repositories {
+                kotlinDev()
+            }
+
+            tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+                kotlinOptions {
+                    freeCompilerArgs += "-Xdisable-default-scripting-plugin"
+                }
+            }
+
             gradlePlugin {
                 (plugins) {
                     "my-plugin" {

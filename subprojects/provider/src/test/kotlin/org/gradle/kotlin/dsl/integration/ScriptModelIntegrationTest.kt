@@ -71,7 +71,10 @@ abstract class ScriptModelIntegrationTest : AbstractIntegrationTest() {
 
     protected
     fun withMultiProjectKotlinBuildSrc(): Array<ProjectSourceRoots> {
-        withFile("buildSrc/settings.gradle.kts", """include(":a", ":b", ":c")""")
+        withSettingsIn("buildSrc", """
+            $pluginManagementBlockWithKotlinDevRepository
+            include(":a", ":b", ":c")
+        """)
         withFile("buildSrc/build.gradle.kts", """
             plugins {
                 java
@@ -82,6 +85,7 @@ abstract class ScriptModelIntegrationTest : AbstractIntegrationTest() {
 
             kotlinDslProjects.forEach {
                 it.apply(plugin = "org.gradle.kotlin.kotlin-dsl")
+                it.repositories.kotlinDev()
             }
 
             dependencies {

@@ -39,6 +39,16 @@ open class AbstractIntegrationTest {
         withGradleJvmArguments("-Xms128m", "-Xmx512m", "-Dfile.encoding=UTF-8")
 
     protected
+    val pluginManagementBlockWithKotlinDevRepository = """
+        pluginManagement {
+            repositories {
+                kotlinDev()
+                gradlePluginPortal()
+            }
+        }
+    """
+
+    protected
     val projectRoot: File
         get() = File(temporaryFolder.root, toSafeFileName(testName.methodName)).apply { mkdirs() }
 
@@ -74,12 +84,24 @@ open class AbstractIntegrationTest {
         """)
 
     protected
-    fun withKotlinBuildSrc() =
+    fun withKotlinBuildSrc() {
+        withSettingsIn("buildSrc", pluginManagementBlockWithKotlinDevRepository)
         withBuildScriptIn("buildSrc", """
             plugins {
                 `kotlin-dsl`
             }
+
+            repositories {
+                kotlinDev()
+            }
+
+            tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+                kotlinOptions {
+                    freeCompilerArgs += "-Xdisable-default-scripting-plugin"
+                }
+            }
         """)
+    }
 
     protected
     fun withClassJar(fileName: String, vararg classes: Class<*>) =

@@ -41,12 +41,6 @@ class TestKitIntegrationTest : AbstractIntegrationTest() {
                 kotlinDev()
             }
 
-            tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-                kotlinOptions {
-                    freeCompilerArgs += "-Xdisable-default-scripting-plugin"
-                }
-            }
-
             gradlePlugin {
                 (plugins) {
                     "test" {

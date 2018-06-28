@@ -468,12 +468,6 @@ class ProjectSchemaAccessorsIntegrationTest : AbstractIntegrationTest() {
                 kotlinDev()
             }
 
-            tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-                kotlinOptions {
-                    freeCompilerArgs += "-Xdisable-default-scripting-plugin"
-                }
-            }
-
             gradlePlugin {
                 (plugins) {
                     "mine" {
@@ -526,12 +520,6 @@ class ProjectSchemaAccessorsIntegrationTest : AbstractIntegrationTest() {
 
             repositories {
                 kotlinDev()
-            }
-
-            tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-                kotlinOptions {
-                    freeCompilerArgs += "-Xdisable-default-scripting-plugin"
-                }
             }
 
             gradlePlugin {
@@ -626,12 +614,6 @@ class ProjectSchemaAccessorsIntegrationTest : AbstractIntegrationTest() {
 
             repositories {
                 kotlinDev()
-            }
-
-            tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-                kotlinOptions {
-                    freeCompilerArgs += "-Xdisable-default-scripting-plugin"
-                }
             }
 
             gradlePlugin {

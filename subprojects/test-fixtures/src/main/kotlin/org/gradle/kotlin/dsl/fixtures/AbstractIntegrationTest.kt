@@ -94,12 +94,6 @@ open class AbstractIntegrationTest {
             repositories {
                 kotlinDev()
             }
-
-            tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-                kotlinOptions {
-                    freeCompilerArgs += "-Xdisable-default-scripting-plugin"
-                }
-            }
         """)
     }
 
